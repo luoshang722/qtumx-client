@@ -5,7 +5,7 @@
     </v-card-title>
     <v-form v-model="valid">
       <h2>Basic</h2>
-      <label>Chain id (only a-z 0-9 allowed) *</label>
+      <label>Chain id (only a-z 0-9 allowed) *</label>    
       <v-text-field
         v-model="chainId"
         :rules="chainIdRules"
@@ -26,12 +26,12 @@
         :rules="messageHeaderRules"
       ></v-text-field>
       <h2>Consensus</h2>
-      <label>Algorithm(only support PoA now) *</label>
+      <label>Algorithm (only support PoA now) *</label>
       <v-select
         v-model="alg"
         :items="[{text: 'PoA', value: 'PoA'}]"
       ></v-select>
-      <label>Miner list *</label>
+      <label>Miner list (one or serveral addresses seperated by ,)*</label>
       <v-text-field
         v-model="minerList"
         :rules="[this.fieldRequired]"
@@ -52,7 +52,7 @@
         v-model="defaultPort"
         :rules="[this.fieldRequired,this.isPositiveInt,this.portLimit]"
       ></v-text-field>
-      <label>Rpc prot *</label>
+      <label>Rpc port *</label>
       <v-text-field
         v-model="rpcPort"
         :rules="[this.fieldRequired,this.isPositiveInt,this.portLimit]"
@@ -71,7 +71,7 @@
         v-model="initReward"
         :rules="[this.fieldRequired,this.isPositiveInt]"
       ></v-text-field>
-      <label>Halving interval (an integer > 0) * </label>
+      <label>Halving interval (an integer >= 0, and 0 means no halving, which will reward miners constantly) *</label>
       <v-text-field
         v-model="halvingInterval"
         :rules="[this.fieldRequired,this.isPositiveInt]"
@@ -90,22 +90,69 @@
 </template>
 
 <script>
-  import utils from '@/libs/utils';
+  import utils from '@/libs/utils'; 
+ 
+  function chain_id()
+  {
+    var x = "mychain";
+    for (var i=0;i<5;i++)
+    {
+	x += Math.floor(Math.random()*10);
+    }
+    return x;
+  }
+
+  function token_name()
+  {
+    var x = "MYT";
+    for (var i=0;i<5;i++)
+    {
+        x += Math.floor(Math.random()*10);
+    }
+    return x;
+  } 
+  
+  function description_func()
+  {
+    var x = "my chain ";
+    for (var i=0;i<5;i++)
+    {
+	x += Math.floor(Math.random()*10);
+    }
+    return x;
+  }
+  
+  function message_header()
+  {
+    var x = "",
+    arr = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'];
+    for(var i=0; i<8; i++){
+      x += arr[Math.floor(Math.random()*16)]
+    }
+    return x;
+  }
+
+  var defaultChainId = chain_id();
+  var defaultTokenName = token_name();
+  var defaultDes = description_func();
+  var defaultMessageHeader = message_header();
+  var defaultPort = Math.floor(Math.random()*(65534 - 1025 + 1) + 1025)  
+  var defaultRpcPort = Math.floor(Math.random()*(65534 - 1025 + 1) + 1025)
 
   export default {
     data() {
       return {
         valid: false,
-        chainId: '',
-        tokenName: '',
-        description: '',
-        messageHeader: '',
+	chainId: defaultChainId,    
+        tokenName: defaultTokenName,
+        description: defaultDes,
+        messageHeader: defaultMessageHeader,
         alg: 'PoA',
         minerList: '',
         blockInterval: 10,
         blockTimeout: 5,
-        defaultPort: '',
-        rpcProt: '',
+        defaultPort: defaultPort,
+        rpcPort: defaultRpcPort,
         dnsSeed: '',
         ipSeed: '',
         initReward: 2000000,
@@ -158,7 +205,7 @@
     },
     beforeMount() {
       const user = utils.getUser();
-      if (user) {
+      if (true) {
         this.minerList = utils.getUser().address;
       } else {
         this.$router.push({ name: 'Login' });
